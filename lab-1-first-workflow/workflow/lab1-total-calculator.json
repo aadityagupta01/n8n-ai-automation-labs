@@ -1,0 +1,147 @@
+{
+  "name": "Lab 1",
+  "nodes": [
+    {
+      "parameters": {},
+      "name": "When clicking 'Execute workflow'",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        -112
+      ],
+      "id": "66670489-9d7d-4da2-a2ea-62b231f1f0f1"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"customer\": \"Ada\",\n  \"amount\": 42,\n  \"country\": \"IN\"\n}",
+        "options": {}
+      },
+      "name": "Lab input",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -48,
+        -112
+      ],
+      "id": "1c505ab2-d0e9-4940-8dde-7520de8d6258",
+      "notes": "Test data for Lab 1 · Your first n8n workflow. Do not edit; every step is checked against it."
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a0b489c2-0b73-448f-a89f-5f348f911da2",
+              "name": "total",
+              "value": "={{ Math.round($json.body.amount * 1.18 * 100) / 100 }}",
+              "type": "number"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        336,
+        -256
+      ],
+      "id": "8ad50124-11d9-4991-aad8-c2e039e7f2ea",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "lab1-final",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.2,
+      "position": [
+        32,
+        -368
+      ],
+      "id": "729cde6b-874e-4b1e-90d9-fedba769cf63",
+      "name": "Webhook",
+      "webhookId": "5b87fd3b-b4d0-46eb-82ef-39921937c391"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"total\": {{ $json.total }}\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        560,
+        -256
+      ],
+      "id": "70659610-0423-4779-b7e4-9aff1216167e",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking 'Execute workflow'": {
+      "main": [
+        [
+          {
+            "node": "Lab input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lab input": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "9fc487ca-ab6d-48a9-b674-39865dbff116",
+  "meta": {
+    "instanceId": "921b04d66799a47d96493b3c6c162da7a1ce1d6d2d4afb8e10b994dea6e6631d"
+  },
+  "nodeGroups": [],
+  "id": "yUJ4w32V82n0B0NU",
+  "tags": []
+}

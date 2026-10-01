@@ -1,0 +1,244 @@
+{
+  "name": "Lab 2",
+  "nodes": [
+    {
+      "parameters": {},
+      "name": "When clicking 'Execute workflow'",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "4426f6e5-5602-4cb4-a4e9-e201e9681ecf"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"prompt\": \"What is 17 multiplied by 23? Reply with only the number.\"\n}",
+        "options": {}
+      },
+      "name": "Lab input",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        0
+      ],
+      "id": "37b25f42-4662-41cd-b791-6b94098c8434",
+      "notes": "Test data for Lab 2 · Build an AI agent with tools. Do not edit; every step is checked against it."
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "{{ $json.body.prompt }}",
+        "options": {
+          "systemMessage": "Always use the calculator tool for arithmetic."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        464,
+        -144
+      ],
+      "id": "8c2b6eb0-1092-4545-991f-075f93679cd2",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        320,
+        128
+      ],
+      "id": "ffd6ed6b-4811-4ef8-a7fa-124d38885c44",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "6X6rK4W91BlUMOKV",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        688,
+        0
+      ],
+      "id": "df372887-ad2f-453d-a2d1-08e19422e1af",
+      "name": "Calculator"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.sessionId ?? 'lab' }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        608,
+        112
+      ],
+      "id": "9be84e1b-a633-4e1a-a91a-c9a063b19e9a",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Get the latest USD exchange rates",
+        "url": "https://api.frankfurter.dev/v1/latest?base=USD",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.5,
+      "position": [
+        720,
+        160
+      ],
+      "id": "235ade16-4b2b-4da0-b9d6-ef79671d8865",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "lab2-final",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.2,
+      "position": [
+        144,
+        -256
+      ],
+      "id": "df7b18dd-4b12-400c-9d73-793d17fea9e4",
+      "name": "Webhook",
+      "webhookId": "c28e4d9b-8616-4879-96ec-d077b242b2be"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"output\": {{ JSON.stringify($json.output) }} }",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        816,
+        -144
+      ],
+      "id": "cb38e3d3-3e7b-42cd-9709-2c964bf1b833",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking 'Execute workflow'": {
+      "main": [
+        [
+          {
+            "node": "Lab input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lab input": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "e5c0a9dd-9b44-40c2-86fc-306f62013fd7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "921b04d66799a47d96493b3c6c162da7a1ce1d6d2d4afb8e10b994dea6e6631d"
+  },
+  "nodeGroups": [],
+  "id": "6laMK6DNyZJBhyOf",
+  "tags": []
+}
